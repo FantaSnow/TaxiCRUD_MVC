@@ -1,0 +1,51 @@
+﻿@page "/auto/update/{id:guid}"
+@inject NavigationManager Navigation
+@inject IObjService<AutoModel, AutoCreate, AutoUpdate> AutoService
+@inject IMapper mapper
+
+<h1>Update</h1>
+
+<EditForm Model="@cityUpdate" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label>Name</label>
+        <InputText @bind-Value="cityUpdate.Name" class="form-control" />
+        <ValidationMessage For="@(() => cityUpdate.Name)" />
+    </div>
+    <div class="mb-3">
+        <label>Number</label>
+        <InputNumber @bind-Value="cityUpdate.Number" class="form-control" />
+        <ValidationMessage For="@(() => cityUpdate.Number)" />
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-primary" type="submit">Save</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+    private AutoUpdate cityUpdate = new AutoUpdate();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != Guid.Empty)
+        {
+            var result = await AutoService.GetObjectById(Id);
+            if (result != null)
+            {
+                cityUpdate = mapper.Map<AutoUpdate>(result);
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (Id != Guid.Empty)
+        {
+            await AutoService.UpdateObject(cityUpdate);
+            Navigation.NavigateTo("/auto/list");
+        }
+    }
+}

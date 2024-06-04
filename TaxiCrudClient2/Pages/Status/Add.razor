@@ -1,0 +1,31 @@
+﻿@page "/status/add"
+@inject NavigationManager Navigation
+@inject IObjService<StatusModel, StatusCreate, StatusUpdate> StatusService
+@inject IMapper mapper
+
+<h1>New Skill</h1>
+
+<EditForm Model="@status" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Status</label>
+        <InputText @bind-Value="status.Name" class="form-control" />
+        <ValidationMessage For="@(() => status.Name)" />
+    </div>
+
+    <div class="mb-3">
+        <button class="btn btn-primary" type="submit">Save</button>
+    </div>
+</EditForm>
+
+@code {
+    private StatusCreate status = new StatusCreate();
+
+    private async Task HandleValidSubmit()
+    {
+        await StatusService.CreateObject(status);
+        Navigation.NavigateTo("status/list");
+    }
+}

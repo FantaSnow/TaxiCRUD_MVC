@@ -1,0 +1,6 @@
+@TaxiCrudServer_HostAddress = http://localhost:5148
+
+GET {{TaxiCrudServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

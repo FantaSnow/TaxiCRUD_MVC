@@ -1,0 +1,48 @@
+﻿@page "/status/update/{id:guid}"
+@inject NavigationManager Navigation
+@inject IObjService<StatusModel, StatusCreate, StatusUpdate> StatusService
+@inject IMapper mapper
+
+<h1>Update</h1>
+
+<EditForm Model="@cityUpdate" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label>Status</label>
+        <InputText @bind-Value="cityUpdate.Name" class="form-control" />
+        <ValidationMessage For="@(() => cityUpdate.Name)" />
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-primary" type="submit">Save</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+    private StatusUpdate cityUpdate = new StatusUpdate();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != Guid.Empty)
+        {
+            var result = await StatusService.GetObjectById(Id);
+            if (result != null)
+            {
+                cityUpdate = mapper.Map<StatusUpdate>(result);
+            }
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (Id != Guid.Empty)
+        {
+            await StatusService.UpdateObject(cityUpdate);
+            Navigation.NavigateTo("/status/list");
+        }
+    }
+}
+
+

@@ -1,0 +1,31 @@
+﻿@page "/city/add"
+@inject NavigationManager Navigation
+@inject IObjService<CityModel, CityCreate, CityUpdate> SkillService
+@inject IMapper mapper
+
+<h1>New Skill</h1>
+
+<EditForm Model="@skillCreate" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Name</label>
+        <InputText @bind-Value="skillCreate.Name" class="form-control" />
+        <ValidationMessage For="@(() => skillCreate.Name)" />
+    </div>
+
+    <div class="mb-3">
+        <button class="btn btn-primary" type="submit">Save</button>
+    </div>
+</EditForm>
+
+@code {
+    private CityCreate skillCreate = new CityCreate();
+
+    private async Task HandleValidSubmit()
+    {
+        await SkillService.CreateObject(skillCreate);
+        Navigation.NavigateTo("city/list");
+    }
+}

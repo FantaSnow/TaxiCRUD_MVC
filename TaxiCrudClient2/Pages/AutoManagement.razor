@@ -1,0 +1,126 @@
+﻿@page "/autos"
+@using TaxiCrut.Client.Infrastructure
+@using TaxiCrut.Infrastructure
+@inject HttpAutoService AutoService
+
+<PageTitle>Auto Management</PageTitle>
+
+<h3>Auto Management</h3>
+
+<!-- Add Auto Form -->
+<EditForm Model="@newAuto" OnValidSubmit="@CreateAuto">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="name">Name:</label>
+        <InputText id="name" @bind-Value="newAuto.Name" />
+    </div>
+    <div>
+        <label for="number">Number:</label>
+        <InputNumber id="number" @bind-Value="newAuto.Number" />
+    </div>
+    <button type="submit">Add Auto</button>
+</EditForm>
+
+<hr />
+
+<!-- Auto List -->
+@if (autos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Number</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var auto in autos)
+            {
+                <tr>
+                    <td>@auto.Name</td>
+                    <td>@auto.Number</td>
+                    <td>
+                        <button @onclick="() => EditAuto(auto)">Edit</button>
+                        <button @onclick="() => DeleteAuto(auto.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Edit Auto Modal -->
+@if (isEditing)
+{
+    <div class="modal">
+        <div class="modal-content">
+            <span class="close" @onclick="CloseEditModal">&times;</span>
+            <EditForm Model="@editAuto" OnValidSubmit="@UpdateAuto">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div>
+                    <label for="editName">Name:</label>
+                    <InputText id="editName" @bind-Value="editAuto.Name" />
+                </div>
+                <div>
+                    <label for="editNumber">Number:</label>
+                    <InputNumber id="editNumber" @bind-Value="editAuto.Number" />
+                </div>
+                <button type="submit">Save Changes</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    private IEnumerable<AutoModel> autos;
+    private AutoCreate newAuto = new();
+    private AutoUpdate editAuto = new();
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        autos = await AutoService.GetAutosAsync();
+    }
+
+    private async Task CreateAuto()
+    {
+        await AutoService.CreateAutoAsync(newAuto);
+        newAuto = new AutoCreate();
+        autos = await AutoService.GetAutosAsync();
+    }
+
+    private void EditAuto(AutoModel auto)
+    {
+        editAuto.Id = auto.Id;
+        editAuto.Name = auto.Name;
+        editAuto.Number = auto.Number;
+        isEditing = true;
+    }
+
+    private async Task UpdateAuto()
+    {
+        await AutoService.UpdateAutoAsync(editAuto);
+        isEditing = false;
+        autos = await AutoService.GetAutosAsync();
+    }
+
+    private async Task DeleteAuto(Guid id)
+    {
+        await AutoService.DeleteAutoAsync(id);
+        autos = await AutoService.GetAutosAsync();
+    }
+
+    private void CloseEditModal()
+    {
+        isEditing = false;
+    }
+}

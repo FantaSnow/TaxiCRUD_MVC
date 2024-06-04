@@ -1,0 +1,76 @@
+﻿@page "/auto/list"
+@inject NavigationManager Navigation
+@inject IObjService<AutoModel, AutoCreate, AutoUpdate> AutoService
+@inject IMapper mapper
+
+<a href="/auto/add" class="btn btn-success float-end">Add Auto</a>
+
+<h2 class="mt-3 mb-3">Autos</h2>
+
+@if (Autos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!Autos.Any())
+{
+    <p>No cities available.</p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Number</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Autos)
+                    {
+                        <tr>
+                            <th scope="row">@p.Name</th>
+                            <th scope="row">@p.Number</th>
+                            <td>
+                                <a href="@($"auto/update/{p.Id}")" class="btn btn-outline-warning btn-sm"><i class="bi bi-pencil"></i> Edit</a>
+                                <button @onclick="() => Delete(p.Id)" class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AutoModel> Autos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            AutoService.SetEndpoint("auto");
+            Autos = await AutoService.GetObjects();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching autos: {ex.Message}");
+        }
+    }
+
+    async Task Delete(Guid id)
+    {
+        try
+        {
+            await AutoService.DeleteObject(id);
+            Autos = await AutoService.GetObjects();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting city: {ex.Message}");
+        }
+    }
+}
